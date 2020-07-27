@@ -29,6 +29,7 @@ from collections import defaultdict
 from time import sleep
 import keyboard
 import math
+import requests
 
 start = time.clock()
 __version__ = u"0.1"
@@ -99,6 +100,7 @@ def main(argv):
         sys.exit(2)
         
      
+    # used when pytyhon jira lib used, just overhead in this case 
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
     
@@ -120,6 +122,14 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
     logging.info("SKIP:{0}".format(SKIP))
     logging.info("CVALUE:{0}".format(CVALUE))
     logging.info("CFIELD:{0}".format(CFIELD))  
+           
+    #"customfield_10010": 42.07       
+    
+    #test, get all project info
+    response = requests.get('https://jirapoc.ambientia.fi/rest/api/2/project', auth=(USER, PSWD))
+    print(response)     
+    print (response.json()) 
+           
            
     end = time.clock()
     totaltime=end-start
