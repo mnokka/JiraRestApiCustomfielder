@@ -30,6 +30,7 @@ from time import sleep
 import keyboard
 import math
 import requests
+import json
 
 start = time.clock()
 __version__ = u"0.1"
@@ -126,10 +127,57 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
     #"customfield_10010": 42.07       
     
     #test, get all project info
-    response = requests.get('https://jirapoc.ambientia.fi/rest/api/2/project', auth=(USER, PSWD))
-    print(response)     
-    print (response.json()) 
+    #response = requests.get('https://jirapoc.ambientia.fi/rest/api/2/project', auth=(USER, PSWD))
+    #print(response)     
+    #print (response.json()) 
            
+           
+    
+    
+    #payload = {"customfield_10127": 707}
+    #r = requests.put('https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1', params=payload,auth=(USER, PSWD))
+    #print(r)     
+    #print (r.json()   )                     
+     
+     
+    #TODO: remove read only       
+    #payload = {"fields": {"customfield_10127": "456"}} 
+    #payload = {"fields": {"customfield_10128": "5555456"}} 
+
+    #WORKS
+    try:
+        
+      #works  
+      #payload = {"fields": {"customfield_10128": "37777756"}} 
+      payload = {"fields": {"customfield_10127": 666634543}} 
+      url = 'https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1/'
+
+      headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      }
+
+      #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+      #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
+      r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+      print(r)     
+      print (r.text   )   
+    
+    #not correct trappinng
+    except JIRAError as e: 
+                        logging.debug(" ********** JIRA ERROR DETECTED: ***********")
+                        logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
+                    #sys.exit(5) 
+    else: 
+        logging.debug("All OK") 
+     
+       
+    # worksalso using python lib
+   # issue = jira.issue('LIV-1')
+   # issue.update(customfield_10127= 1233)       
+   
+    # TODO: return readonly
+    
            
     end = time.clock()
     totaltime=end-start
