@@ -203,7 +203,7 @@ def SIMU(ISSUE,jira):
     while (COUNTER>0): 
        Updater(issue,10127,(random.randint(1, 1000)),jira) 
        Updater(issue,10129,(random.randint(1, 1000)),jira)
-       Updater(issue,10127,(random.randint(1, 1000)),jira)
+       Updater(issue,10130,(random.randint(1, 1000)),jira)
        COUNTER=COUNTER-1
         
        logging.debug("Sleeping 5 secs")
