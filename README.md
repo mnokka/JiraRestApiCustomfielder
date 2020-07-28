@@ -13,7 +13,7 @@ Custom field ID and Jira issue showing custom field given as parameters.
   -i jira_issue         <JIRA issue  
   -c customfieldname    <Customfield ID>  
   -l customfield_value  <Value for customfield>  
-  -o on|off             <Execute small hardcoded livefeed simulator. Off by
+  -o on|off             <Execute small hardcoded (3 custom fields) livefeed simulator. Off by
                         default>  
   
 
