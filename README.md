@@ -13,7 +13,8 @@ Custom field ID and Jira issue showing custom field given as parameters.
   -i jira_issue         <JIRA issue  
   -c customfieldname    <Customfield ID>  
   -l customfield_value  <Value for customfield>  
-  -r on|off             <DryRun - do nothing but emulate. Off by default>  
+  -o on|off             <Execute small hardcoded livefeed simulator. Off by
+                        default>  
   
 
   ** EXAMPLE: **

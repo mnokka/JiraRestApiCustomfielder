@@ -32,6 +32,9 @@ import keyboard
 import math
 import requests
 import json
+import random 
+import time
+
 #from pandas._libs.interval import numbers
 
 start = time.clock()
@@ -82,6 +85,7 @@ def main(argv):
     parser.add_argument('-c', help='<Customfield ID>',metavar="customfieldname")
     parser.add_argument('-l', help='<Value for customfield>',metavar="customfield_value")
     parser.add_argument('-r', help='<DryRun - do nothing but emulate. Off by default>',metavar="on|off",default="off")
+    parser.add_argument('-o', help='<Execute small hardcoded  livefeed simulator. Off by default>',metavar="on|off",default="off")
  
 
     args = parser.parse_args()
@@ -97,6 +101,11 @@ def main(argv):
     else:
         SKIP=0    
     #logging.info("SKIP:{0}".format(SKIP))
+    if (args.o=="on"):
+        SIMUL="on"
+    else:
+        SIMUL="off"
+    
     
     # quick old-school way to check needed parameters
     if (JIRASERVICE=='' or  PSWD=='' or USER=='' or CFIELD=='' or CVALUE=='' or ISSUE==''):
@@ -109,7 +118,15 @@ def main(argv):
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
     
-    Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE)
+    # Change value as stated in tool parameters
+    if (SIMUL=="off"):
+        Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE)
+    elif (SIMUL=="on"):
+        # Fakes live feed for three numberic Jira custom fields, mimicing counters
+        SIMU(ISSUE,jira)
+    else:
+        logging.error("\n Dont know what to do!!\n ")
+         
 
 
 
@@ -119,18 +136,12 @@ def main(argv):
 
 def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
 
-    #logging.info("SKIP:{0}".format(SKIP))
-    #logging.info("CVALUE:{0}".format(CVALUE))
-    #logging.info("CFIELD:{0}".format(CFIELD))  
-           
-       
-     
      
     #TODO: remove read only field protection      
     
     #WORKS, using REST API, setting number custom field value
     #try:
-      #payload = {"fields": {"customfield_10128": "37777756"}} 
+    #payload = {"fields": {"customfield_10128": "37777756"}} 
     #  payload = {"fields": {"customfield_10127": 666634543}} 
     #  url = 'https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1/'
 
@@ -138,8 +149,8 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     #  'Content-Type': 'application/json',
     #  'Accept': 'application/json',
     #  }
-      #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
-      #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
+    #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+    #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
     #  r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
     #  print(r)     
     #  print (r.text   )   
@@ -157,13 +168,7 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     
     try:
                
-           #WORKS 
-           # mydict = {
-           #     'customfield_10127':  123}
-           # issue.update(fields=mydict)
-            
             fieldtag="customfield_"+CFIELD 
-            myvalue=12345
             mydict = {'{0}'.format(fieldtag):  int(CVALUE)} 
             issue.update(fields=mydict) 
                   
@@ -184,20 +189,57 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     print ("*************************************************************************")    
     #logging.debug ("--Script exiting. Bye!--")
 
-#############################################
-# Generate timestamp 
+
+
+
+############################################################################################################################################
+# Use hardcoded three numberic customfield IDs to mimic consta data feed to these fields
 #
-def GetStamp():
-    from datetime import datetime,date
+
+def SIMU(ISSUE,jira):
+
+    COUNTER=10
+    issue = jira.issue(ISSUE)
+    while (COUNTER>0): 
+       Updater(issue,10127,(random.randint(1, 1000)),jira) 
+       Updater(issue,10129,(random.randint(1, 1000)),jira)
+       Updater(issue,10127,(random.randint(1, 1000)),jira)
+       COUNTER=COUNTER-1
+        
+       logging.debug("Sleeping 5 secs")
+       time.sleep(5)
+       
+    end = time.clock()
+    totaltime=end-start
+    print ("Time taken:{0} seconds".format(totaltime))   
+    return 
+  
+ 
+##########################################################################
+#
+#
+def Updater(ISSUE,CFIELD,CVALUE,jira):    
+
+
+    try:           
+            issue = jira.issue(ISSUE)
+            fieldtag="customfield_"+str(CFIELD) 
+            mydict = {'{0}'.format(fieldtag):  int(CVALUE)} 
+            issue.update(fields=mydict) 
+                  
+    except JIRAError as e: 
+                        logging.debug(" ********** JIRA ERROR DETECTED: ***********")
+                        logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
+                        #sys.exit(5) 
+    else: 
+        logging.debug("Issue {0} (customfield_{1} value:{2} )updated OK".format(issue,CFIELD,CVALUE)) 
+    # TODO: return readonly field protection
     
-    hours=str(datetime.today().hour)
-    minutes=str(datetime.today().minute)
-    seconds=str(datetime.today().second)
-    milliseconds=str(datetime.today().microsecond)
 
-    stamp=hours+"_"+minutes+"_"+seconds+"_"+milliseconds
 
-    return stamp
+
+
+
 
 
 if __name__ == "__main__":
