@@ -1,4 +1,4 @@
-# Chagne Jira custom filed value
+# Change Jira number custom filed value
 # 1) using REST API
 # 2) using Python lib
 
@@ -6,6 +6,7 @@
 # 
 # NOTES:
 # 1) For this POC removed .netrc authetication, using pure arguments
+# 2) Requires Jira issue as a parameter (issue holds numberic custom field to be changed)
 #
 # Using Python V2
 #
@@ -61,7 +62,7 @@ def main(argv):
     
     EXAMPLE:
     
-    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDNAME -v \"Value for custom field\" """
+    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDID -v NUMBERVALUEFORCUSTOMFIELD -i JIRAISSUE """
 
     
     )
@@ -77,6 +78,7 @@ def main(argv):
     parser.add_argument("-w",help='<JIRA password>',metavar="password")
     parser.add_argument('-u', help='<JIRA user account>',metavar="user")
     parser.add_argument('-s', help='<JIRA service>',metavar="server_address")
+    parser.add_argument('-i', help='<JIRA issue',metavar="jira_issue")
     parser.add_argument('-c', help='<Customfield ID>',metavar="customfieldname")
     parser.add_argument('-l', help='<Value for customfield>',metavar="customfield_value")
     parser.add_argument('-r', help='<DryRun - do nothing but emulate. Off by default>',metavar="on|off",default="off")
@@ -89,6 +91,7 @@ def main(argv):
     USER= args.u or ''
     CFIELD=args.c or ''
     CVALUE=args.l or ''
+    ISSUE=args.i or ''
     if (args.r=="on"):
         SKIP=1
     else:
@@ -96,7 +99,7 @@ def main(argv):
     #logging.info("SKIP:{0}".format(SKIP))
     
     # quick old-school way to check needed parameters
-    if (JIRASERVICE=='' or  PSWD=='' or USER=='' or CFIELD=='' or CVALUE==''):
+    if (JIRASERVICE=='' or  PSWD=='' or USER=='' or CFIELD=='' or CVALUE=='' or ISSUE==''):
         logging.error("\n---> MISSING ARGUMENTS!!\n ")
         parser.print_help()
         sys.exit(2)
@@ -106,45 +109,25 @@ def main(argv):
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
     
-    Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE)
+    Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE)
 
 
 
 ############################################################################################################################################
-# Parse attachment files and add to matching Jira issue
+# Do the Jira operations
 #
 
-#NOTE: Uses hardcoded sheet/column value
+def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
 
-def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
-
-    # Change these according the need, or add as program arguments
- 
- 
-    logging.info("SKIP:{0}".format(SKIP))
-    logging.info("CVALUE:{0}".format(CVALUE))
-    logging.info("CFIELD:{0}".format(CFIELD))  
+    #logging.info("SKIP:{0}".format(SKIP))
+    #logging.info("CVALUE:{0}".format(CVALUE))
+    #logging.info("CFIELD:{0}".format(CFIELD))  
            
-    #"customfield_10010": 42.07       
-    
-    #test, get all project info
-    #response = requests.get('https://jirapoc.ambientia.fi/rest/api/2/project', auth=(USER, PSWD))
-    #print(response)     
-    #print (response.json()) 
-           
-           
-    
-    
-    #payload = {"customfield_10127": 707}
-    #r = requests.put('https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1', params=payload,auth=(USER, PSWD))
-    #print(r)     
-    #print (r.json()   )                     
+       
      
      
     #TODO: remove read only field protection      
-    #payload = {"fields": {"customfield_10127": "456"}} 
-    #payload = {"fields": {"customfield_10128": "5555456"}} 
-
+    
     #WORKS, using REST API, setting number custom field value
     #try:
       #payload = {"fields": {"customfield_10128": "37777756"}} 
@@ -170,39 +153,26 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
      
        
     # Setting using Python Jira lib (REST API wrapper)
-    issue = jira.issue('LIV-1')
+    issue = jira.issue(ISSUE)
     
     try:
-            #fieldtag="customfield_"+CFIELD #+"= 44445"
-            #myvalue=78787
-            #fieldtag2=json.load(fieldtag)
-            #print ("fieldtag:{0}".format(fieldtag))
-            #issue.update("\'{0}\'".format(fieldtag)) 
-            #issue.update(fields={"fields={\'{0}\'".format(fieldtag): myvalue "}" })    
-            # works: issue.update(fields={'customfield_10127': 77777})  
-           
+               
            #WORKS 
            # mydict = {
            #     'customfield_10127':  123}
-                
            # issue.update(fields=mydict)
             
             fieldtag="customfield_"+CFIELD 
             myvalue=12345
             mydict = {'{0}'.format(fieldtag):  int(CVALUE)} 
             issue.update(fields=mydict) 
-            
-            
-            
-            
-            
-            #issue.update("fields={0}: {1}".format(fieldtag,myvalue))
+                  
     except JIRAError as e: 
                         logging.debug(" ********** JIRA ERROR DETECTED: ***********")
                         logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
                         #sys.exit(5) 
     else: 
-        logging.debug("issue update on") 
+        logging.debug("Issue update OK") 
     # TODO: return readonly field protection
     
            
@@ -211,11 +181,8 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
     print ("Time taken:{0} seconds".format(totaltime))
        
             
-    print ("*************************************************************************")
-    
-logging.debug ("--Script exiting. Bye!--")
-
-
+    print ("*************************************************************************")    
+    #logging.debug ("--Script exiting. Bye!--")
 
 #############################################
 # Generate timestamp 
