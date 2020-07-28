@@ -187,10 +187,9 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
                 
            # issue.update(fields=mydict)
             
-            
             fieldtag="customfield_"+CFIELD 
             myvalue=12345
-            mydict = {'{0}'.format(fieldtag):  int(myvalue)} 
+            mydict = {'{0}'.format(fieldtag):  int(CVALUE)} 
             issue.update(fields=mydict) 
             
             
