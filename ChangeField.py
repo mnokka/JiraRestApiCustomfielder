@@ -31,6 +31,7 @@ import keyboard
 import math
 import requests
 import json
+#from pandas._libs.interval import numbers
 
 start = time.clock()
 __version__ = u"0.1"
@@ -76,7 +77,7 @@ def main(argv):
     parser.add_argument("-w",help='<JIRA password>',metavar="password")
     parser.add_argument('-u', help='<JIRA user account>',metavar="user")
     parser.add_argument('-s', help='<JIRA service>',metavar="server_address")
-    parser.add_argument('-c', help='<Customfield name>',metavar="customfieldname")
+    parser.add_argument('-c', help='<Customfield ID>',metavar="customfieldname")
     parser.add_argument('-l', help='<Value for customfield>',metavar="customfield_value")
     parser.add_argument('-r', help='<DryRun - do nothing but emulate. Off by default>',metavar="on|off",default="off")
  
@@ -140,43 +141,70 @@ def Parse(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE):
     #print (r.json()   )                     
      
      
-    #TODO: remove read only       
+    #TODO: remove read only field protection      
     #payload = {"fields": {"customfield_10127": "456"}} 
     #payload = {"fields": {"customfield_10128": "5555456"}} 
 
-    #WORKS
-    try:
-        
-      #works  
+    #WORKS, using REST API, setting number custom field value
+    #try:
       #payload = {"fields": {"customfield_10128": "37777756"}} 
-      payload = {"fields": {"customfield_10127": 666634543}} 
-      url = 'https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1/'
+    #  payload = {"fields": {"customfield_10127": 666634543}} 
+    #  url = 'https://jirapoc.ambientia.fi/rest/api/2/issue/LIV-1/'
 
-      headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      }
-
+    #  headers = {
+    #  'Content-Type': 'application/json',
+    #  'Accept': 'application/json',
+    #  }
       #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
       #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
-      r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
-      print(r)     
-      print (r.text   )   
-    
+    #  r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+    #  print(r)     
+    #  print (r.text   )   
     #not correct trappinng
+    #except JIRAError as e: 
+    #                    logging.debug(" ********** JIRA ERROR DETECTED: ***********")
+    #                    logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
+                        #sys.exit(5) 
+    #else: 
+    #    logging.debug("All OK") 
+     
+       
+    # Setting using Python Jira lib (REST API wrapper)
+    issue = jira.issue('LIV-1')
+    
+    try:
+            #fieldtag="customfield_"+CFIELD #+"= 44445"
+            #myvalue=78787
+            #fieldtag2=json.load(fieldtag)
+            #print ("fieldtag:{0}".format(fieldtag))
+            #issue.update("\'{0}\'".format(fieldtag)) 
+            #issue.update(fields={"fields={\'{0}\'".format(fieldtag): myvalue "}" })    
+            # works: issue.update(fields={'customfield_10127': 77777})  
+           
+           #WORKS 
+           # mydict = {
+           #     'customfield_10127':  123}
+                
+           # issue.update(fields=mydict)
+            
+            
+            fieldtag="customfield_"+CFIELD 
+            myvalue=12345
+            mydict = {'{0}'.format(fieldtag):  int(myvalue)} 
+            issue.update(fields=mydict) 
+            
+            
+            
+            
+            
+            #issue.update("fields={0}: {1}".format(fieldtag,myvalue))
     except JIRAError as e: 
                         logging.debug(" ********** JIRA ERROR DETECTED: ***********")
                         logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
-                    #sys.exit(5) 
+                        #sys.exit(5) 
     else: 
-        logging.debug("All OK") 
-     
-       
-    # worksalso using python lib
-   # issue = jira.issue('LIV-1')
-   # issue.update(customfield_10127= 1233)       
-   
-    # TODO: return readonly
+        logging.debug("issue update on") 
+    # TODO: return readonly field protection
     
            
     end = time.clock()
