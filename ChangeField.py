@@ -103,6 +103,8 @@ def main(argv):
     #logging.info("SKIP:{0}".format(SKIP))
     if (args.o=="on"):
         SIMUL="on"
+    elif (args.o=="insight"):   
+        SIMUL="insight"
     else:
         SIMUL="off"
     
@@ -124,6 +126,10 @@ def main(argv):
     elif (SIMUL=="on"):
         # Fakes live feed for three numberic Jira custom fields, mimicing counters
         SIMU(ISSUE,jira)
+    
+    elif (SIMUL=="insight"):
+        # set soem hardcode Insight Object attribures
+        Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE)
     else:
         logging.error("\n Dont know what to do!!\n ")
          
@@ -235,7 +241,46 @@ def Updater(ISSUE,CFIELD,CVALUE,jira):
         logging.debug("Issue {0} (customfield_{1} value:{2} )updated OK".format(issue,CFIELD,CVALUE)) 
     # TODO: return readonly field protection
     
+#################################################################################
+#
+#
+def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
+    
+    print ("Insight")
+    #WORKS, using REST API, setting number custom field value
+    try:
+    #payload = {"fields": {"customfield_10128": "37777756"}} 
+    
+       payload ={
+       "objectAttributeValues": [
+       {
+         "value": 999
+       }
+       ],
+       "objectId": 7,
+       "objectTypeAttributeId": 39
+        }
+       #  payload = {"fields": {"customfield_10127": 666634543}} 
+       #url = 'https://jirapoc.ambientia.fi/rest/insight/1.0/objectattribute/7'   #SHERVOL2-54'
+       url='https://jirapoc.ambientia.fi/rest/insight/1.0/objecttypeattribute/7/39'
 
+       headers = {
+    'Content-Type': 'application/json',
+     'Accept': 'application/json',
+     }
+    
+       #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+       #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
+       r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+       print(r)     
+       print (r.text   )   
+       #not correct trappinng
+    except JIRAError as e: 
+                        logging.debug(" ********** JIRA ERROR DETECTED: ***********")
+                        logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
+                        #sys.exit(5) 
+    else: 
+        logging.debug("All OK") 
 
 
 
