@@ -246,62 +246,37 @@ def Updater(ISSUE,CFIELD,CVALUE,jira):
 #
 def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     
-    print ("Insight")
-    #WORKS, using REST API, setting number custom field value
+    print ("Insight operation")
+
     try:
-    #payload = {"fields": {"customfield_10128": "37777756"}} 
-    
-       payload ={
-       "objectAttributeValues": [
-       {
-         "value": 999
-       }
-       ],
-       "objectId": 7,
-       "objectTypeAttributeId": 39
-        }
-       
-       payload2 =  {   
-        
-         "objectAttributeValues": [{
-         "value": "9999"
-         }]
-         }    
-        
-        
-       payload3 = {
+  
+    # REST API DOC: https://insight-javadoc.riada.io/insight-javadoc-8.6/insight-rest/#object__id__put 
+      payload3 = {
   "objectTypeId": 7,
   "attributes": [
     {
       "objectTypeAttributeId": 39,
       "objectAttributeValues": [
         {
-          "value": "7777"
+          "value": "555555"
         },
       ]
     }
   ]
 }
         
-        
-        
-       
-       #  payload = {"fields": {"customfield_10127": 666634543}} 
-       #url = 'https://jirapoc.ambientia.fi/rest/insight/1.0/objectattribute/7'   #SHERVOL2-54'
-       #url='https://jirapoc.ambientia.fi/rest/insight/2.5.0/objecttypeattribute/7'
-       url='https://jirapoc.ambientia.fi/rest/insight/1.0/object/SHERVOL2-54'
+      url='https://jirapoc.ambientia.fi/rest/insight/1.0/object/SHERVOL2-54'
 
-       headers = {
+      headers = {
     'Content-Type': 'application/json',
      'Accept': 'application/json',
      }
     
-       #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
-       #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
-       r=requests.put(url, headers=headers, json=payload3,auth=(USER, PSWD))   
-       print(r)     
-       print (r.text   )   
-       #not correct trappinng
+      r=requests.put(url, headers=headers, json=payload3,auth=(USER, PSWD))   
+      print(r)     
+      print (r.text   )   
+    
+      
     except JIRAError as e: 
                         logging.debug(" ********** JIRA ERROR DETECTED: ***********")
                         logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
