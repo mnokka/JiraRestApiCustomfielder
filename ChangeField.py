@@ -105,6 +105,8 @@ def main(argv):
         SIMUL="on"
     elif (args.o=="insight"):   
         SIMUL="insight"
+    elif (args.o=="simuinsight"):   
+        SIMUL="simuinsight"    
     else:
         SIMUL="off"
     
@@ -130,6 +132,11 @@ def main(argv):
     elif (SIMUL=="insight"):
         # set soem hardcode Insight Object attribures
         Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE)
+        
+    elif (SIMUL=="simuinsight"):
+        # set soem hardcode Insight Object attribures
+        INSIGHTSIMU(PSWD,USER)   
+        
     else:
         logging.error("\n Dont know what to do!!\n ")
          
@@ -220,9 +227,36 @@ def SIMU(ISSUE,jira):
     print ("Time taken:{0} seconds".format(totaltime))   
     return 
   
+#####################################################################################################
+# Use hardcode Mindville Insight object info to feed constant data to these object attribute fields
+#
+
+
+def INSIGHTSIMU(PSWD,USER):
+
+    COUNTER=10
+    VALUE=15555
+    while (COUNTER>0): 
+       
+       OBJECTISSUEID="SHERVOL2-54"
+       OBJECTID=7
+       ATTRIBUTEID=39
+       InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE)
+       COUNTER=COUNTER-1
+       VALUE=VALUE+100
+        
+       logging.debug("Sleeping 5 secs")
+       time.sleep(5)
+       
+    end = time.clock()
+    totaltime=end-start
+    print ("Time taken:{0} seconds".format(totaltime))   
+    return 
+  
+  
  
 ##########################################################################
-#
+# Update Jira numeric customfield
 #
 def Updater(ISSUE,CFIELD,CVALUE,jira):    
 
@@ -242,9 +276,21 @@ def Updater(ISSUE,CFIELD,CVALUE,jira):
     # TODO: return readonly field protection
     
 #################################################################################
-#
+# Test function how Insight attribute is changed
 #
 def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
+    
+    
+    VALUE=15555
+    OBJECTISSUEID="SHERVOL2-54"
+    OBJECTID=7
+    ATTRIBUTEID=39
+    InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE)
+    print ("bye")
+    exit(5)
+    
+    
+    
     
     print ("Insight operation")
 
@@ -277,16 +323,64 @@ def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
       print (r.text   )   
     
       
-    except JIRAError as e: 
-                        logging.debug(" ********** JIRA ERROR DETECTED: ***********")
-                        logging.debug(" ********** Statuscode:{0}    Statustext:{1} ************".format(e.status_code,e.text))
-                        #sys.exit(5) 
+    except requests.exceptions.HTTPError as errh:
+       logging.debug ("Http Error: {0}".format(errh))
+    except requests.exceptions.ConnectionError as errc:
+       logging.debug ("Error Connecting: {0}".format(errc))
+    except requests.exceptions.Timeout as errt:
+       logging.debug ("Timeout Error: {0}".format(errt))
+    except requests.exceptions.RequestException as err:
+       logging.debug ("Geeneral Error? {0}".format(err))
+
     else: 
         logging.debug("All OK") 
 
 
+###############################################################################
+# Update Mindville Insight object attributes
+#
+#
+def InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE):
+      
+    print ("Insight updater working")
+    try:
+    # REST API DOC: https://insight-javadoc.riada.io/insight-javadoc-8.6/insight-rest/#object__id__put 
+      payload3 = {
+  "objectTypeId": "{0}".format(OBJECTID),
+  "attributes": [
+    {
+      "objectTypeAttributeId": "{0}".format(ATTRIBUTEID),
+      "objectAttributeValues": [
+        {
+          "value": "{0}".format(VALUE)
+        },
+      ]
+    }
+  ]
+}
+        
+      url='https://jirapoc.ambientia.fi/rest/insight/1.0/object/{0}'.format(OBJECTISSUEID)
 
+      headers = {
+    'Content-Type': 'application/json',
+     'Accept': 'application/json',
+     }
+    
+      r=requests.put(url, headers=headers, json=payload3,auth=(USER, PSWD))   
+      #print(r)     
+      #print (r.text   )   
+      
+    except requests.exceptions.HTTPError as errh:
+       logging.debug ("Http Error: {0}".format(errh))
+    except requests.exceptions.ConnectionError as errc:
+       logging.debug ("Error Connecting: {0}".format(errc))
+    except requests.exceptions.Timeout as errt:
+       logging.debug ("Timeout Error: {0}".format(errt))
+    except requests.exceptions.RequestException as err:
+       logging.debug ("Geeneral Error? {0}".format(err))
 
+    else: 
+        logging.debug("All OK") 
 
 
 if __name__ == "__main__":
