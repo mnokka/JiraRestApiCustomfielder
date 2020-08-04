@@ -260,9 +260,36 @@ def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
        "objectId": 7,
        "objectTypeAttributeId": 39
         }
+       
+       payload2 =  {   
+        
+         "objectAttributeValues": [{
+         "value": "9999"
+         }]
+         }    
+        
+        
+       payload3 = {
+  "objectTypeId": 7,
+  "attributes": [
+    {
+      "objectTypeAttributeId": 39,
+      "objectAttributeValues": [
+        {
+          "value": "7777"
+        },
+      ]
+    }
+  ]
+}
+        
+        
+        
+       
        #  payload = {"fields": {"customfield_10127": 666634543}} 
        #url = 'https://jirapoc.ambientia.fi/rest/insight/1.0/objectattribute/7'   #SHERVOL2-54'
-       url='https://jirapoc.ambientia.fi/rest/insight/1.0/objecttypeattribute/7/39'
+       #url='https://jirapoc.ambientia.fi/rest/insight/2.5.0/objecttypeattribute/7'
+       url='https://jirapoc.ambientia.fi/rest/insight/1.0/object/SHERVOL2-54'
 
        headers = {
     'Content-Type': 'application/json',
@@ -271,7 +298,7 @@ def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     
        #r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
        #r=requests.post(url, headers=headers, data=json.dumps(payload),auth=(USER, PSWD))    
-       r=requests.put(url, headers=headers, json=payload,auth=(USER, PSWD))   
+       r=requests.put(url, headers=headers, json=payload3,auth=(USER, PSWD))   
        print(r)     
        print (r.text   )   
        #not correct trappinng
