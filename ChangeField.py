@@ -58,14 +58,20 @@ def main(argv):
     logging.debug (u"--Starting operations --") 
 
  
-    parser = argparse.ArgumentParser(description=" Set value of Jira custom field",
+    parser = argparse.ArgumentParser(description=" Set value of Jira custom field / Insigth object attribute / simulate custom fields / Insight attribute values constant changes",
     
     
     epilog="""
     
-    EXAMPLE:
+    EXAMPLES:
     
-    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDID -v NUMBERVALUEFORCUSTOMFIELD -i JIRAISSUE """
+    1) Change numeric customfield (defined in args)
+    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDID -v NUMBERVALUEFORCUSTOMFIELD -i JIRAISSUE
+    2) Feed constant feed of data for (hardcoded) customfields
+    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDID -v NUMBERVALUEFORCUSTOMFIELD -i JIRAISSUE -o simu
+    3) Feed constant feed of data for (harcoded) Mindville Insight object attributes
+    ChangeField.py  -u MYUSERNAME -w MYPASSWORD -s https://MYOWNJIRA.fi/ -c CUSTOMFIELDID -v NUMBERVALUEFORCUSTOMFIELD -i JIRAISSUE -o simuninsght
+     """
 
     
     )
@@ -85,7 +91,7 @@ def main(argv):
     parser.add_argument('-c', help='<Customfield ID>',metavar="customfieldname")
     parser.add_argument('-l', help='<Value for customfield>',metavar="customfield_value")
     parser.add_argument('-r', help='<DryRun - do nothing but emulate. Off by default>',metavar="on|off",default="off")
-    parser.add_argument('-o', help='<Execute small hardcoded  livefeed simulator. Off by default>',metavar="on|off",default="off")
+    parser.add_argument('-o', help='<Execute small hardcoded  livefeed simulator changing hardcode custom field values (on) / Insigth object attribute values (simuinsight). Off by default>',metavar="on|off|simuinsight",default="off")
  
 
     args = parser.parse_args()
