@@ -235,18 +235,24 @@ def SIMU(ISSUE,jira):
 def INSIGHTSIMU(PSWD,USER):
 
     COUNTER=10
-    VALUE=15555
+    VALUE=4567
+    VALUE2=1
+    VALUE3=100
+    VALUE4=50
     while (COUNTER>0): 
-       
-       OBJECTISSUEID="SHERVOL2-54"
-       OBJECTID=7
-       ATTRIBUTEID=39
-       InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE)
-       COUNTER=COUNTER-1
-       VALUE=VALUE+100
-        
-       logging.debug("Sleeping 5 secs")
-       time.sleep(5)
+
+      InsightUpdater(PSWD,USER,"SHERVOL2-54",7,39,VALUE)
+      InsightUpdater(PSWD,USER,"SHERVOL2-54",7,40,VALUE2)
+      InsightUpdater(PSWD,USER,"SHERVOL2-55",7,39,VALUE3)
+      InsightUpdater(PSWD,USER,"SHERVOL2-55",7,40,VALUE4)
+      COUNTER=COUNTER-1
+      VALUE=VALUE+100
+      VALUE2=VALUE2+900
+      VALUE3=VALUE3+37
+      VALUE4=VALUE4+111
+      
+      logging.debug("Sleeping 5 secs")
+      time.sleep(5)
        
     end = time.clock()
     totaltime=end-start
@@ -280,19 +286,16 @@ def Updater(ISSUE,CFIELD,CVALUE,jira):
 #
 def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
     
-    
-    VALUE=15555
+    print ("Insight operation")
+
+
+    VALUE=15566655
     OBJECTISSUEID="SHERVOL2-54"
     OBJECTID=7
     ATTRIBUTEID=39
     InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE)
     print ("bye")
     exit(5)
-    
-    
-    
-    
-    print ("Insight operation")
 
     try:
   
