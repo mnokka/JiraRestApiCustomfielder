@@ -240,24 +240,73 @@ def SIMU(ISSUE,jira):
 
 def INSIGHTSIMU(PSWD,USER):
 
-    COUNTER=10
+    COUNTER=50
+    
+    # initial measurement values
     VALUE=4567
     VALUE2=1
     VALUE3=100
     VALUE4=50
+    HOURS1=9
+    MINUTES1=5
+    HOURS2=2
+    MINUTES2=3
+    TIME2DONE=0
+    TEMPERATURE=22
+    
+    TIMESTRING1=str(HOURS1)+" hours   "+str(MINUTES1)+" minutes"
+    TIMESTRING2=str(HOURS2)+" hours   "+str(MINUTES2)+" minutes"
     while (COUNTER>0): 
-
+      
       InsightUpdater(PSWD,USER,"SHERVOL2-54",7,39,VALUE)
       InsightUpdater(PSWD,USER,"SHERVOL2-54",7,40,VALUE2)
       InsightUpdater(PSWD,USER,"SHERVOL2-55",7,39,VALUE3)
       InsightUpdater(PSWD,USER,"SHERVOL2-55",7,40,VALUE4)
+      InsightUpdater(PSWD,USER,"SHERVOL2-54",7,42,TIMESTRING1)
+      InsightUpdater(PSWD,USER,"SHERVOL2-55",7,42,TIMESTRING2)
+      InsightUpdater(PSWD,USER,"SHERVOL2-54",7,43,TEMPERATURE)
+      InsightUpdater(PSWD,USER,"SHERVOL2-55",7,43,TEMPERATURE)
+      
+      #Change Insight values to mimic constant measurement data flow
       COUNTER=COUNTER-1
       VALUE=VALUE+100
       VALUE2=VALUE2+900
       VALUE3=VALUE3+37
       VALUE4=VALUE4+111
+      TEMPERATURE=(random.randint(0, 50))
       
-      logging.debug("Sleeping 5 secs")
+      #not checking if times up
+      MINUTES1=MINUTES1-3
+      if (MINUTES1<=0):
+          MINUTES1=59
+          HOURS1=HOURS1-1
+      if (HOURS1<=0):
+          HOURS1=9
+      TIMESTRING1=str(HOURS1)+" hours   "+str(MINUTES1)+" minutes" 
+      
+      
+      #check if time passed
+      if (TIME2DONE==0): 
+         MINUTES2=MINUTES2-21
+         if (MINUTES2<=0 and HOURS2>0):
+            MINUTES2=59 #keep minutes running forver
+            HOURS2=HOURS2-1
+         elif (MINUTES2<=0 and HOURS2<=0):
+            MINUTES2=0  
+            TIME2DONE=1
+         if (HOURS2<=0):
+            HOURS2=0
+         TIMESTRING2=str(HOURS2)+" hours   "+str(MINUTES2)+" minutes" 
+      # calculate oevertime
+      elif (TIME2DONE==1):
+          MINUTES2=MINUTES2+9
+          if (MINUTES2>=59):
+              MINUTES2=0
+              HOURS2=HOURS2+1
+          TIMESTRING2="OVERTIME PASSED: "+str(HOURS2)+" hours   "+str(MINUTES2)+" minutes"    
+        
+      
+      logging.debug("Sleeping 5 secs (counter:{0}".format(COUNTER))
       time.sleep(5)
        
     end = time.clock()
@@ -352,6 +401,7 @@ def Insight(JIRASERVICE,PSWD,USER,ENV,jira,SKIP,CFIELD,CVALUE,ISSUE):
 def InsightUpdater(PSWD,USER,OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE):
       
     print ("Insight updater working")
+    print ("InsightObject:{0} ({1})   AttributeID:{2} Value changed:{3}".format(OBJECTISSUEID,OBJECTID,ATTRIBUTEID,VALUE))
     try:
     # REST API DOC: https://insight-javadoc.riada.io/insight-javadoc-8.6/insight-rest/#object__id__put 
       payload3 = {
